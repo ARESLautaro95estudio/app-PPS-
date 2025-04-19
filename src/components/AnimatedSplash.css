@@ -1,0 +1,82 @@
+.animated-splash {
+    --background: #YOUR_COLOR;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    padding: 20px;
+    color: white;
+  }
+  
+  .splash-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 40px 0;
+  }
+  
+  .name-text {
+    animation: fadeInDown 1s ease-out forwards;
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  
+  .icon-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .app-icon {
+    width: 150px;
+    height: 150px;
+    animation: scaleIn 1.5s ease-out 0.5s forwards;
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  
+  .division-text {
+    animation: fadeInUp 1s ease-out 1s forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  
+  @keyframes fadeInDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

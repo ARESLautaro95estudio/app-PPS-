@@ -1,0 +1,7 @@
+{
+  "name": "AppL.M.PrimerEtapa",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}

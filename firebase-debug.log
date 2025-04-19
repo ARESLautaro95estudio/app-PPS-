@@ -1,0 +1,21 @@
+[debug] [2025-04-06T15:02:20.985Z] ----------------------------------------------------------------------
+[debug] [2025-04-06T15:02:20.992Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\lemar\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2025-04-06T15:02:20.992Z] CLI Version:   14.1.0
+[debug] [2025-04-06T15:02:20.993Z] Platform:      win32
+[debug] [2025-04-06T15:02:20.993Z] Node Version:  v20.14.0
+[debug] [2025-04-06T15:02:20.993Z] Time:          Sun Apr 06 2025 12:02:20 GMT-0300 (hora estándar de Argentina)
+[debug] [2025-04-06T15:02:20.993Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-06T15:02:21.006Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-06T15:02:21.007Z] > authorizing via signed-in user (l.e.marguery@gmail.com)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\lemar\Desktop\Practicas profesionales\Primer proyecto\app-l-m-primer-etapa
+
