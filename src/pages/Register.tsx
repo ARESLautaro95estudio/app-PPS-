@@ -17,7 +17,7 @@ import {
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../lib/firebase';
 import { useHistory } from 'react-router';
-import { addRecentUser } from '../services/recentUsers'; 
+import { addRecentUser } from '../services/RecentUsers'; 
 
 const Register: React.FC = () => {
   const [name, setName] = useState('');

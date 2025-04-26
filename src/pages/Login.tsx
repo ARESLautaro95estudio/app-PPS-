@@ -25,7 +25,7 @@ import {
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from '../lib/firebase';
 import { useHistory } from 'react-router';
-import { getRecentUsers, addRecentUser } from '../services/recentUsers';
+import  { getRecentUsers, addRecentUser } from '../services/RecentUsers';
 import { person, closeCircle } from 'ionicons/icons';
 
 interface RecentUser {

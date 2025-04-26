@@ -36,7 +36,6 @@ setupIonicReact();
 const App: React.FC = () => { 
   const  [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
-    // Hide the native splash screen
     SplashScreen.hide().catch(error => console.error('Error hiding splash screen', error));
   }, []);
   
@@ -54,7 +53,7 @@ const App: React.FC = () => {
           <Route exact path="/login" component={Login} />
           <Route exact path="/register" component={Register} />
           <PrivateRoute exact path="/home" component={Home} />
-          {/* <PrivateRoute exact path="/add-task" component={TaskFormPage} /> */}
+          <PrivateRoute exact path="/add-task" component={TaskFormPage} />
           <Route exact path="/">
             <Redirect to="/home" />
           </Route>

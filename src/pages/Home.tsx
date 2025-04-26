@@ -31,7 +31,7 @@ import { auth, db } from '../lib/firebase';
 import { useHistory } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { addRecentUser } from '../services/recentUsers'; // Importar el servicio
+import { addRecentUser } from '../services/RecentUsers'; // Importar el servicio
 
 const Home: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
