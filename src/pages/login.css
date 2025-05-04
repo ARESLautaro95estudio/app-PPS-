@@ -1,0 +1,56 @@
+.access-quick-container {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f5f5f5;
+  }
+  
+  .access-quick-title {
+    text-align: center;
+    margin: 0 0 15px 0;
+    color: #333;
+  }
+  
+  .quick-access-button {
+    margin-bottom: 10px;
+  }
+  
+  .separator {
+    position: relative;
+    text-align: center;
+    margin: 20px 0;
+    height: 20px;
+    border-top: 1px solid #ddd;
+  }
+  
+  .separator-text {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 0 15px;
+    color: #777;
+  }
+  
+  .error-message {
+    margin-bottom: 15px;
+    display: block;
+    text-align: center;
+  }
+  
+  .login-button {
+    margin-bottom: 15px;
+  }
+  
+  .input-field {
+    margin-bottom: 15px;
+    --border-color: #ddd;
+    --border-radius: 4px;
+    --padding-start: 15px;
+    --background: #ffffff;
+  }
+  
+  .password-field {
+    margin-bottom: 20px;
+  }

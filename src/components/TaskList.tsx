@@ -32,6 +32,7 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
         setLoading(true);
         setError('');
         const userTasks = await getUserTasks();
+        console.log('Tareas cargadas:', userTasks); // Para depuración
         setTasks(userTasks);
       } catch (err: any) {
         console.error('Error al cargar tareas:', err);
@@ -81,7 +82,7 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
   if (tasks.length === 0) {
     return <IonText className="ion-padding">No hay tareas para mostrar.</IonText>;
   }
-
+  
   return (
     <IonList>
       {tasks.map(task => (
@@ -120,5 +121,4 @@ const TaskList: React.FC<TaskListProps> = ({ onEditTask, refreshTrigger }) => {
     </IonList>
   );
 };
-
 export default TaskList;

@@ -24,6 +24,7 @@ import './theme/variables.css';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import TaskFormPage from './pages/TaskFormPage'; // Añadir esta importación
 
 /* Context */
 import { AuthProvider } from './contexts/AuthContext';
@@ -34,7 +35,8 @@ import { SplashScreen } from '@capacitor/splash-screen';
 setupIonicReact();
 
 const App: React.FC = () => { 
-  const  [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+  
   useEffect(() => {
     SplashScreen.hide().catch(error => console.error('Error hiding splash screen', error));
   }, []);
@@ -46,21 +48,25 @@ const App: React.FC = () => {
   if (showSplash) {
     return <AnimatedSplash onFinished={handleSplashFinished} />;
   }
-  <IonApp>
-    <AuthProvider>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/register" component={Register} />
-          <PrivateRoute exact path="/home" component={Home} />
-          <PrivateRoute exact path="/add-task" component={TaskFormPage} />
-          <Route exact path="/">
-            <Redirect to="/home" />
-          </Route>
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </AuthProvider>
-  </IonApp>
+  
+  // Añadir 'return' aquí
+  return (
+    <IonApp>
+      <AuthProvider>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/register" component={Register} />
+            <PrivateRoute exact path="/home" component={Home} />
+            <PrivateRoute exact path="/add-task" component={TaskFormPage} />
+            <Route exact path="/">
+              <Redirect to="/home" />
+            </Route>
+          </IonRouterOutlet>
+        </IonReactRouter>
+      </AuthProvider>
+    </IonApp>
+  );
 };
 
 export default App;

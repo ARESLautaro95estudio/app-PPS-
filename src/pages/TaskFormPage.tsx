@@ -82,23 +82,23 @@ const TaskFormPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-
+      
       if (isEditMode && id) {
         // Actualizar tarea existente
         await updateTask(id, {
-          title,
-          description,
-          dueDate: dueDate ? new Date(dueDate) : undefined
+          titulo: title,
+          descripcion: description,
+          fecha: dueDate ? dueDate : undefined  // Usar el string directamente
         });
         
         setToastMessage('¡Tarea actualizada correctamente!');
       } else {
         // Crear nueva tarea
         await createTask({
-          title,
-          description,
+          titulo: title,
+          descripcion: description,
           completed: false,
-          dueDate: dueDate ? new Date(dueDate) : undefined
+          fecha: dueDate ? dueDate : undefined  // Enviar directamente como string
         });
         
         setToastMessage('¡Tarea creada correctamente!');
@@ -111,8 +111,8 @@ const TaskFormPage: React.FC = () => {
         history.push('/home');
       }, 1000);
     } catch (err) {
-      console.error('Error al guardar tarea:', err);
-      setError('Error al guardar la tarea');
+      console.error('Error al guardar tarea 114:', err);
+      setError('Error al guardar la tarea115');
     } finally {
       setLoading(false);
     }

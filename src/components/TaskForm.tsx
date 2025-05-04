@@ -75,8 +75,8 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
       onSave();
       onClose();
     } catch (err) {
-      console.error('Error al guardar tarea:', err);
-      setError('Error al guardar la tarea');
+      console.error('Error al guardar tarea:78', err);
+      setError('Error al guardar la tarea 79');
     }
   };
 

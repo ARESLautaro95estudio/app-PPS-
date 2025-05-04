@@ -143,23 +143,23 @@ const Home: React.FC = () => {
         ) : (
           <IonList>
             {tasks.map((task) => (
-              <IonCard key={task.id} onClick={() => handleTaskClick(task.id)}>
-                <IonCardHeader>
-                  <IonCardSubtitle>
-                    {task.createdAt && new Date(task.createdAt.seconds * 1000).toLocaleDateString()}
-                  </IonCardSubtitle>
-                  <IonCardTitle>{task.title}</IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                  <p>{task.description}</p>
-                  <IonItem lines="none">
-                    <IonLabel>
-                      Estado: {task.completed ? 'Completada' : 'Pendiente'}
-                    </IonLabel>
-                  </IonItem>
-                </IonCardContent>
-              </IonCard>
-            ))}
+  <IonCard key={task.id} onClick={() => handleTaskClick(task.id)}>
+    <IonCardHeader>
+      <IonCardSubtitle>
+        {task.createdAt && new Date(task.createdAt.seconds * 1000).toLocaleDateString()}
+      </IonCardSubtitle>
+      <IonCardTitle>{task.titulo}</IonCardTitle>  {/* Cambiado de title a titulo */}
+    </IonCardHeader>
+    <IonCardContent>
+      <p>{task.descripcion}</p>  {/* Cambiado de description a descripcion */}
+      <IonItem lines="none">
+        <IonLabel>
+          Estado: {task.completed ? 'Completada' : 'Pendiente'}
+        </IonLabel>
+      </IonItem>
+    </IonCardContent>
+  </IonCard>
+))}
           </IonList>
         )}
 
