@@ -8,7 +8,7 @@ import {
   TaskValidator,
   ValidationResult 
 } from '../types/taskTypes';
-import { TaskService } from '../services/TaskService';
+import { TaskService } from '../services/taskServices';
 
 /**
  * Controlador para manejar la lógica de negocio de las tareas

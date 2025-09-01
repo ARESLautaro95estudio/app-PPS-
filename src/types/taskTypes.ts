@@ -265,6 +265,6 @@ export class TaskFormatter {
 export const TASK_CONSTANTS = {
   MAX_TITLE_LENGTH: 100,
   MAX_DESCRIPTION_LENGTH: 500,
-  DEFAULT_DATE_FORMAT: 'DD/MM/YYYY',
+  DATE_PRESENTATION: 'date' as const, // Para IonDatetime moderno
   COLLECTION_NAME: 'Tareas'
 } as const;

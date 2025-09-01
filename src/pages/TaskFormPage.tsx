@@ -197,11 +197,13 @@ const TaskFormPage: React.FC = () => {
             <IonItem>
               <IonLabel>Fecha límite</IonLabel>
               <IonDatetime
-                displayFormat="DD/MM/YYYY"
-                placeholder="Seleccionar fecha (opcional)"
+                presentation="date"
+                
                 value={fecha}
                 onIonChange={handleFechaChange}
                 min={new Date().toISOString().split('T')[0]} // No permitir fechas pasadas
+                locale="es-ES"
+                firstDayOfWeek={1} // Lunes como primer día
               />
             </IonItem>
             
