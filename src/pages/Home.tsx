@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import AlarmButton from '../components/AlarmButton';
 
 import { 
   IonContent, 
@@ -27,6 +25,8 @@ import {
   IonLoading,
   IonToast
 } from '@ionic/react';
+import React, { useState, useEffect } from 'react';
+import AlarmButton from '../components/AlarmButton';
 import { add, logOut } from 'ionicons/icons';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
@@ -49,7 +49,7 @@ const Home: React.FC = () => {
     
     try {
       setLoading(true);
-      const tasksRef = collection(db, 'tasks');
+      const tasksRef = collection(db, 'Tareas');
       const q = query(tasksRef, where('userId', '==', currentUser.uid));
       
       const querySnapshot = await getDocs(q);
@@ -110,6 +110,7 @@ const Home: React.FC = () => {
   };
 
  
+
 return (
   <IonPage>
     <IonHeader>
