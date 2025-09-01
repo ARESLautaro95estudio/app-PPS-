@@ -10,7 +10,7 @@ import {
   IonSpinner 
 } from '@ionic/react';
 import { notifications, notificationsOff } from 'ionicons/icons';
-import { AlarmController } from '../controllers/alarmController';
+import { AlarmController } from '../controller/alarmController';
 
 interface AlarmButtonProps {
   position?: {

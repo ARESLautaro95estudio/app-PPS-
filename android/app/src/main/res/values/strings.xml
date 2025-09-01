@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">AppL.M.PrimerEtapa</string>
     <string name="title_activity_main">AppL.M.PrimerEtapa</string>
-    <string name="package_name">io.ionic.starter</string>
-    <string name="custom_url_scheme">io.ionic.starter</string>
+    <string name="package_name">com.laureano.tareasapp</string>
+    <string name="custom_url_scheme">com.laureano.tareasapp</string>
 </resources>

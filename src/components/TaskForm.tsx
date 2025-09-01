@@ -24,7 +24,7 @@ interface TaskFormProps {
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit }) => {
-  const [title, setTitle] = useState('');
+  const [titulo, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -34,7 +34,7 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
     if (isOpen) {
       if (taskToEdit) {
         // Modo edición: llenar con datos existentes
-        setTitle(taskToEdit.title);
+        setTitle(taskToEdit.titulo);
         setDescription(taskToEdit.description || '');
         setDueDate(taskToEdit.dueDate ? taskToEdit.dueDate.toISOString() : null);
       } else {
@@ -58,14 +58,14 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
       if (taskToEdit) {
         // Actualizar existente
         await updateTask(taskToEdit.id!, {
-          title,
+          titulo,
           description,
           dueDate: dueDate ? new Date(dueDate) : undefined
         });
       } else {
         // Crear nueva
         await createTask({
-          title,
+          titulo,
           description,
           completed: false,
           dueDate: dueDate ? new Date(dueDate) : undefined
