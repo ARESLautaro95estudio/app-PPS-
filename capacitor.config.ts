@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'io.ionic.starter.B',
   appName: 'AppL.M.PrimerEtapa',
   webDir: 'dist',
   bundledWebRuntime: false,
