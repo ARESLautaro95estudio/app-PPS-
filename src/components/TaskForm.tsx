@@ -12,7 +12,8 @@ import {
   IonTitle,
   IonContent,
   IonButtons,
-  IonText
+  IonText,
+  IonLoading
 } from '@ionic/react';
 import { Task, createTask, updateTask } from '../services/dataService';
 
@@ -24,60 +25,95 @@ interface TaskFormProps {
 }
 
 const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit }) => {
-  const [titulo, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState<string | null>(null);
-  const [error, setError] = useState('');
+  // Estados del formulario - nombres consistentes con la interface
+  const [titulo, setTitulo] = useState<string>('');
+  const [descripcion, setDescripcion] = useState<string>('');
+  const [fecha, setFecha] = useState<string>(''); // String para IonDatetime
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Resetear el formulario cuando se abre
+  // Resetear el formulario cuando se abre o cambia la tarea
   useEffect(() => {
     if (isOpen) {
       if (taskToEdit) {
         // Modo edición: llenar con datos existentes
-        setTitle(taskToEdit.titulo);
-        setDescription(taskToEdit.description || '');
-        setDueDate(taskToEdit.dueDate ? taskToEdit.dueDate.toISOString() : null);
+        setTitulo(taskToEdit.titulo);
+        setDescripcion(taskToEdit.descripcion || '');
+        setFecha(taskToEdit.fecha ? taskToEdit.fecha.toISOString() : '');
       } else {
         // Modo creación: resetear campos
-        setTitle('');
-        setDescription('');
-        setDueDate(null);
+        setTitulo('');
+        setDescripcion('');
+        setFecha('');
       }
       setError('');
     }
   }, [isOpen, taskToEdit]);
 
-  const handleSave = async () => {
-    // Validar
-    if (!title.trim()) {
+  // Validación del formulario
+  const validateForm = (): boolean => {
+    if (!titulo.trim()) {
       setError('El título es obligatorio');
-      return;
+      return false;
     }
+    return true;
+  };
+
+  // Manejar guardado
+  const handleSave = async () => {
+    if (!validateForm()) return;
 
     try {
-      if (taskToEdit) {
-        // Actualizar existente
-        await updateTask(taskToEdit.id!, {
-          titulo,
-          description,
-          dueDate: dueDate ? new Date(dueDate) : undefined
+      setLoading(true);
+      setError('');
+
+      const taskData: Omit<Task, 'id' | 'userId' | 'createdAt'> = {
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim() || undefined,
+        completed: taskToEdit ? taskToEdit.completed : false,
+        fecha: fecha ? new Date(fecha) : undefined
+      };
+
+      if (taskToEdit && taskToEdit.id) {
+        // Actualizar tarea existente
+        await updateTask(taskToEdit.id, {
+          titulo: taskData.titulo,
+          descripcion: taskData.descripcion,
+          fecha: taskData.fecha
         });
       } else {
-        // Crear nueva
-        await createTask({
-          titulo,
-          description,
-          completed: false,
-          dueDate: dueDate ? new Date(dueDate) : undefined
-        });
+        // Crear nueva tarea
+        await createTask(taskData);
       }
       
-      onSave();
-      onClose();
-    } catch (err) {
-      console.error('Error al guardar tarea:78', err);
-      setError('Error al guardar la tarea 79');
+      onSave(); // Notificar al componente padre
+      onClose(); // Cerrar modal
+      
+    } catch (err: any) {
+      console.error('Error al guardar tarea:', err);
+      setError(err.message || 'Error al guardar la tarea');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Handlers con tipos seguros
+  const handleTituloChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setTitulo(value || '');
+    if (error && value.trim()) {
+      setError(''); // Limpiar error si se corrige
+    }
+  };
+
+  const handleDescripcionChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setDescripcion(value || '');
+  };
+
+  const handleFechaChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setFecha(value || '');
   };
 
   return (
@@ -88,7 +124,9 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
             {taskToEdit ? 'Editar Tarea' : 'Nueva Tarea'}
           </IonTitle>
           <IonButtons slot="end">
-            <IonButton onClick={onClose}>Cancelar</IonButton>
+            <IonButton onClick={onClose} disabled={loading}>
+              Cancelar
+            </IonButton>
           </IonButtons>
         </IonToolbar>
       </IonHeader>
@@ -97,17 +135,24 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
         <IonItem>
           <IonLabel position="floating">Título *</IonLabel>
           <IonInput
-            value={title}
-            onIonChange={e => setTitle(e.detail.value!)}
+            value={titulo}
+            onIonChange={handleTituloChange}
+            placeholder="Ingresa el título de la tarea"
+            maxlength={100}
+            clearInput
+            disabled={loading}
           />
         </IonItem>
         
         <IonItem>
           <IonLabel position="floating">Descripción</IonLabel>
           <IonTextarea
-            value={description}
-            onIonChange={e => setDescription(e.detail.value!)}
+            value={descripcion}
+            onIonChange={handleDescripcionChange}
             rows={4}
+            placeholder="Describe la tarea (opcional)"
+            maxlength={500}
+            disabled={loading}
           />
         </IonItem>
         
@@ -115,8 +160,11 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
           <IonLabel>Fecha límite</IonLabel>
           <IonDatetime
             displayFormat="DD/MM/YYYY"
-            value={dueDate || ''}
-            onIonChange={e => setDueDate(e.detail.value!)}
+            placeholder="Seleccionar fecha (opcional)"
+            value={fecha}
+            onIonChange={handleFechaChange}
+            min={new Date().toISOString().split('T')[0]} // No fechas pasadas
+            disabled={loading}
           />
         </IonItem>
         
@@ -130,9 +178,15 @@ const TaskForm: React.FC<TaskFormProps> = ({ isOpen, onClose, onSave, taskToEdit
           expand="block" 
           className="ion-margin-top"
           onClick={handleSave}
+          disabled={loading || !titulo.trim()}
         >
-          Guardar
+          {loading ? 'Guardando...' : 'Guardar'}
         </IonButton>
+        
+        <IonLoading 
+          isOpen={loading}
+          message={taskToEdit ? "Actualizando tarea..." : "Creando tarea..."}
+        />
       </IonContent>
     </IonModal>
   );

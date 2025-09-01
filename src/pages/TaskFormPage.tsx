@@ -31,14 +31,17 @@ const TaskFormPage: React.FC = () => {
   const { currentUser } = useAuth();
   const isEditMode = !!id;
 
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState<string | null>(null);
+  // Estados del formulario - nombres consistentes
+  const [titulo, setTitulo] = useState<string>('');
+  const [descripcion, setDescripcion] = useState<string>('');
+  const [fecha, setFecha] = useState<string>(''); // Como string para IonDatetime
+  
+  // Estados de control
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(isEditMode);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>('');
   const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState<string>('');
 
   // Cargar tarea si estamos en modo edición
   useEffect(() => {
@@ -46,18 +49,21 @@ const TaskFormPage: React.FC = () => {
       if (isEditMode && id) {
         try {
           setInitialLoading(true);
+          setError('');
+          
           const task = await getTaskById(id);
           
           if (task) {
-            setTitle(task.title);
-            setDescription(task.description || '');
-            setDueDate(task.dueDate ? task.dueDate.toISOString() : null);
+            setTitulo(task.titulo);
+            setDescripcion(task.descripcion || '');
+            // Convertir fecha a string ISO para IonDatetime
+            setFecha(task.fecha ? task.fecha.toISOString() : '');
           } else {
             setError('No se encontró la tarea');
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error('Error al cargar tarea:', err);
-          setError('Error al cargar la tarea');
+          setError(err.message || 'Error al cargar la tarea');
         } finally {
           setInitialLoading(false);
         }
@@ -67,55 +73,85 @@ const TaskFormPage: React.FC = () => {
     loadTask();
   }, [id, isEditMode]);
 
-  const handleSave = async () => {
-    // Validación
-    if (!title.trim()) {
+  // Validación del formulario
+  const validateForm = (): boolean => {
+    if (!titulo.trim()) {
       setError('El título es obligatorio');
-      return;
+      return false;
     }
 
     if (!currentUser) {
       setError('Debes iniciar sesión para guardar tareas');
-      return;
+      return false;
     }
+
+    return true;
+  };
+
+  // Manejar guardado de tarea
+  const handleSave = async () => {
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
       setError('');
       
+      // Preparar datos de la tarea
+      const taskData: Omit<Task, 'id' | 'userId' | 'createdAt'> = {
+        titulo: titulo.trim(),
+        descripcion: descripcion.trim() || undefined,
+        completed: false, // Nueva tarea siempre empieza como no completada
+        fecha: fecha ? new Date(fecha) : undefined
+      };
+      
       if (isEditMode && id) {
         // Actualizar tarea existente
         await updateTask(id, {
-          titulo: title,
-          descripcion: description,
-          fecha: dueDate ? dueDate : undefined  // Usar el string directamente
+          titulo: taskData.titulo,
+          descripcion: taskData.descripcion,
+          fecha: taskData.fecha
         });
         
         setToastMessage('¡Tarea actualizada correctamente!');
       } else {
         // Crear nueva tarea
-        await createTask({
-          titulo: title,
-          descripcion: description,
-          completed: false,
-          fecha: dueDate ? dueDate : undefined  // Enviar directamente como string
-        });
-        
+        await createTask(taskData);
         setToastMessage('¡Tarea creada correctamente!');
       }
       
       setShowToast(true);
       
-      // Redirigir a la página principal después de un breve retraso
+      // Redirigir después de mostrar el toast
       setTimeout(() => {
         history.push('/home');
-      }, 1000);
-    } catch (err) {
-      console.error('Error al guardar tarea 114:', err);
-      setError('Error al guardar la tarea115');
+      }, 1500);
+      
+    } catch (err: any) {
+      console.error('Error al guardar tarea:', err);
+      setError(err.message || 'Error al guardar la tarea');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Manejar cambios en los inputs con tipos seguros
+  const handleTituloChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setTitulo(value || '');
+    // Limpiar error si había uno
+    if (error && value.trim()) {
+      setError('');
+    }
+  };
+
+  const handleDescripcionChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setDescripcion(value || '');
+  };
+
+  const handleFechaChange = (e: CustomEvent) => {
+    const value = e.detail.value as string;
+    setFecha(value || '');
   };
 
   return (
@@ -139,19 +175,22 @@ const TaskFormPage: React.FC = () => {
             <IonItem>
               <IonLabel position="floating">Título *</IonLabel>
               <IonInput
-                value={title}
-                onIonChange={e => setTitle(e.detail.value!)}
+                value={titulo}
+                onIonChange={handleTituloChange}
                 placeholder="Ingresa el título de la tarea"
+                maxlength={100}
+                clearInput
               />
             </IonItem>
             
             <IonItem>
               <IonLabel position="floating">Descripción</IonLabel>
               <IonTextarea
-                value={description}
-                onIonChange={e => setDescription(e.detail.value!)}
+                value={descripcion}
+                onIonChange={handleDescripcionChange}
                 rows={4}
                 placeholder="Describe la tarea (opcional)"
+                maxlength={500}
               />
             </IonItem>
             
@@ -160,8 +199,9 @@ const TaskFormPage: React.FC = () => {
               <IonDatetime
                 displayFormat="DD/MM/YYYY"
                 placeholder="Seleccionar fecha (opcional)"
-                value={dueDate || ''}
-                onIonChange={e => setDueDate(e.detail.value!)}
+                value={fecha}
+                onIonChange={handleFechaChange}
+                min={new Date().toISOString().split('T')[0]} // No permitir fechas pasadas
               />
             </IonItem>
             
@@ -175,9 +215,9 @@ const TaskFormPage: React.FC = () => {
               expand="block" 
               className="ion-margin-top"
               onClick={handleSave}
-              disabled={loading}
+              disabled={loading || !titulo.trim()}
             >
-              {isEditMode ? 'Actualizar' : 'Crear'} Tarea
+              {loading ? 'Guardando...' : (isEditMode ? 'Actualizar' : 'Crear')} Tarea
             </IonButton>
             
             <IonButton 
@@ -190,7 +230,10 @@ const TaskFormPage: React.FC = () => {
               Cancelar
             </IonButton>
             
-            <IonLoading isOpen={loading} message={isEditMode ? "Actualizando..." : "Creando..."} />
+            <IonLoading 
+              isOpen={loading} 
+              message={isEditMode ? "Actualizando tarea..." : "Creando tarea..."} 
+            />
             
             <IonToast
               isOpen={showToast}

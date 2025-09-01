@@ -13,115 +13,167 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 
-// Interfaces para los tipos de datos
+// Interface Task corregida y consistente
 export interface Task {
   id?: string;
-  titulo: string;       // En español
-  descripcion: string;  // En español
-  completed: boolean;   
-  fecha?: string;       // En español y como string
+  titulo: string;           // Consistente con BD
+  descripcion?: string;     // Opcional y consistente con BD  
+  completed: boolean;       
+  fecha?: Date;            // Cambiado a Date para consistencia
+  userId?: string;         // Opcional para nuevas tareas
+  createdAt?: Date;        // Opcional para nuevas tareas
+}
+
+// Interface para datos como aparecen en Firestore
+interface TaskFirestore {
+  titulo: string;
+  Descripcion?: string;     // Con mayúscula como en BD
+  completed: boolean;
+  Fecha?: Timestamp;        // Con mayúscula como en BD
   userId: string;
-  createdAt: Date;
+  createdAt: Timestamp;
 }
 
 // Colección de tareas
 const tareasCollection = collection(db, 'Tareas');
 
+// Función utilitaria para mapear datos de Firestore a Task
+const mapFirestoreToTask = (id: string, data: any): Task => {
+  return {
+    id,
+    titulo: data.titulo || '',
+    descripcion: data.Descripcion || '', // Mapeo correcto con D mayúscula
+    completed: Boolean(data.completed),
+    fecha: data.Fecha?.toDate() || undefined, // Mapeo correcto con F mayúscula
+    userId: data.userId || '',
+    createdAt: data.createdAt?.toDate() || new Date(),
+  };
+};
+
+// Función utilitaria para mapear Task a formato Firestore
+const mapTaskToFirestore = (task: Omit<Task, 'id' | 'userId' | 'createdAt'>): TaskFirestore => {
+  if (!auth.currentUser) throw new Error('No hay usuario autenticado');
+  
+  return {
+    titulo: task.titulo,
+    Descripcion: task.descripcion || '', // Mapeo a D mayúscula para BD
+    completed: Boolean(task.completed),
+    Fecha: task.fecha ? Timestamp.fromDate(task.fecha) : undefined, // Mapeo a F mayúscula
+    userId: auth.currentUser.uid,
+    createdAt: Timestamp.now()
+  };
+};
+
 // Obtener tareas del usuario actual
 export const getUserTasks = async (): Promise<Task[]> => {
   if (!auth.currentUser) throw new Error('No hay usuario autenticado');
   
-  const q = query(
-    tareasCollection,
-    where('userId', '==', auth.currentUser.uid),
-    orderBy('createdAt', 'desc')
-  );
-  
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      title: data.titulo || '', // Exactamente como aparece en Firestore
-      description: data.Descripcion || '', // Exactamente como aparece en Firestore (con D mayúscula)
-      completed: data.completed || false,
-      dueDate: data.Fecha?.toDate() || null, // Exactamente como aparece en Firestore (con F mayúscula)
-      userId: data.userId,
-      createdAt: data.createdAt?.toDate() || new Date(),
-    } as Task;
-  });
+  try {
+    const q = query(
+      tareasCollection,
+      where('userId', '==', auth.currentUser.uid),
+      orderBy('createdAt', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => mapFirestoreToTask(doc.id, doc.data()));
+  } catch (error) {
+    console.error('Error al obtener tareas:', error);
+    throw new Error('No se pudieron cargar las tareas');
+  }
 };
 
 // Crear una nueva tarea
 export const createTask = async (task: Omit<Task, 'id' | 'userId' | 'createdAt'>): Promise<string> => {
   if (!auth.currentUser) throw new Error('No hay usuario autenticado');
   
-  // Crear objeto para guardar en Firestore, mapeando a los nombres exactos en la BD
-  const taskToSave = {
-    titulo: task.title,                // Mapeo exacto como en la BD
-    Descripcion: task.description,     // Mapeo exacto como en la BD (con D mayúscula)
-    completed: task.completed,
-    Fecha: task.dueDate ? Timestamp.fromDate(task.dueDate) : null, // Mapeo exacto como en la BD (con F mayúscula)
-    userId: auth.currentUser.uid,
-    createdAt: Timestamp.now()
-  };
+  // Validación
+  if (!task.titulo?.trim()) {
+    throw new Error('El título es obligatorio');
+  }
   
-  // Para depuración
-  console.log('Guardando tarea:', taskToSave);
-  
-  const docRef = await addDoc(tareasCollection, taskToSave);
-  return docRef.id;
+  try {
+    const taskToSave = mapTaskToFirestore(task);
+    console.log('Guardando tarea:', taskToSave); // Para depuración
+    
+    const docRef = await addDoc(tareasCollection, taskToSave);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error al crear tarea:', error);
+    throw new Error('No se pudo crear la tarea');
+  }
 };
 
 // Obtener una tarea por ID
 export const getTaskById = async (taskId: string): Promise<Task | null> => {
-  const docRef = doc(db, 'Tareas', taskId);
-  const docSnap = await getDoc(docRef);
-  
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    return {
-      id: docSnap.id,
-      title: data.titulo || '',
-      description: data.Descripcion || '',
-      completed: data.completed || false,
-      dueDate: data.Fecha?.toDate() || null,
-      userId: data.userId,
-      createdAt: data.createdAt?.toDate() || new Date(),
-    } as Task;
+  if (!taskId) {
+    throw new Error('ID de tarea requerido');
   }
   
-  return null;
+  try {
+    const docRef = doc(db, 'Tareas', taskId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return mapFirestoreToTask(docSnap.id, docSnap.data());
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error al obtener tarea:', error);
+    throw new Error('No se pudo obtener la tarea');
+  }
 };
 
 // Actualizar una tarea
 export const updateTask = async (taskId: string, updates: Partial<Task>): Promise<void> => {
-  const taskRef = doc(db, 'Tareas', taskId);
-  
-  // Mapear los campos a actualizar para que coincidan con los nombres en Firestore
-  const updatesToSave: any = {};
-  
-  if (updates.title !== undefined) {
-    updatesToSave.titulo = updates.title;
+  if (!taskId) {
+    throw new Error('ID de tarea requerido');
   }
   
-  if (updates.description !== undefined) {
-    updatesToSave.Descripcion = updates.description;
+  try {
+    const taskRef = doc(db, 'Tareas', taskId);
+    
+    // Mapear los campos a actualizar para que coincidan con los nombres en Firestore
+    const updatesToSave: Partial<TaskFirestore> = {};
+    
+    if (updates.titulo !== undefined) {
+      if (!updates.titulo.trim()) {
+        throw new Error('El título no puede estar vacío');
+      }
+      updatesToSave.titulo = updates.titulo;
+    }
+    
+    if (updates.descripcion !== undefined) {
+      updatesToSave.Descripcion = updates.descripcion;
+    }
+    
+    if (updates.completed !== undefined) {
+      updatesToSave.completed = Boolean(updates.completed);
+    }
+    
+    if (updates.fecha !== undefined) {
+      updatesToSave.Fecha = updates.fecha ? Timestamp.fromDate(updates.fecha) : undefined;
+    }
+    
+    await updateDoc(taskRef, updatesToSave);
+  } catch (error) {
+    console.error('Error al actualizar tarea:', error);
+    throw new Error('No se pudo actualizar la tarea');
   }
-  
-  if (updates.completed !== undefined) {
-    updatesToSave.completed = updates.completed;
-  }
-  
-  if (updates.dueDate !== undefined) {
-    updatesToSave.Fecha = updates.dueDate ? Timestamp.fromDate(updates.dueDate) : null;
-  }
-  
-  await updateDoc(taskRef, updatesToSave);
 };
 
 // Eliminar una tarea
 export const deleteTask = async (taskId: string): Promise<void> => {
-  const taskRef = doc(db, 'Tareas', taskId);
-  await deleteDoc(taskRef);
+  if (!taskId) {
+    throw new Error('ID de tarea requerido');
+  }
+  
+  try {
+    const taskRef = doc(db, 'Tareas', taskId);
+    await deleteDoc(taskRef);
+  } catch (error) {
+    console.error('Error al eliminar tarea:', error);
+    throw new Error('No se pudo eliminar la tarea');
+  }
 };
