@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import AlarmButton from '../components/AlarmButton';
+
 import { 
   IonContent, 
   IonHeader, 
@@ -32,6 +34,7 @@ import { useHistory } from 'react-router-dom';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { addRecentUser } from '../services/RecentUsers'; // Importar el servicio
+
 
 const Home: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -106,79 +109,87 @@ const Home: React.FC = () => {
     history.push(`/task/${taskId}`);
   };
 
-  return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Inicio</IonTitle>
-          <IonButtons slot="end">
-            <IonButton onClick={handleSignOut}>
-              <IonIcon slot="icon-only" icon={logOut} />
-            </IonButton>
-          </IonButtons>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen>
-        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-          <IonRefresherContent></IonRefresherContent>
-        </IonRefresher>
+ 
+return (
+  <IonPage>
+    <IonHeader>
+      <IonToolbar>
+        <IonButtons slot="start">
+          <IonMenuButton />
+        </IonButtons>
+        <IonTitle>Inicio</IonTitle>
+        <IonButtons slot="end">
+          <IonButton onClick={handleSignOut}>
+            <IonIcon slot="icon-only" icon={logOut} />
+          </IonButton>
+        </IonButtons>
+      </IonToolbar>
+    </IonHeader>
+    <IonContent fullscreen>
+      <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+        <IonRefresherContent></IonRefresherContent>
+      </IonRefresher>
 
-        <IonLoading isOpen={loading} message="Cargando tareas..." />
+      <IonLoading isOpen={loading} message="Cargando tareas..." />
 
-        <div className="ion-padding">
-          <h2>Bienvenido, {currentUser?.displayName || 'Usuario'}</h2>
-          <p>Aquí puedes ver tus tareas pendientes</p>
+      <div className="ion-padding">
+        <h2>Bienvenido, {currentUser?.displayName || 'Usuario'}</h2>
+        <p>Aquí puedes ver tus tareas pendientes</p>
+      </div>
+
+      {tasks.length === 0 ? (
+        <div className="ion-padding ion-text-center">
+          <p>No tienes tareas pendientes</p>
+          <IonButton expand="block" onClick={handleAddTask}>
+            Crear una tarea
+          </IonButton>
         </div>
+      ) : (
+        <IonList>
+          {tasks.map((task) => (
+            <IonCard key={task.id} onClick={() => handleTaskClick(task.id)}>
+              <IonCardHeader>
+                <IonCardSubtitle>
+                  {task.createdAt && new Date(task.createdAt.seconds * 1000).toLocaleDateString()}
+                </IonCardSubtitle>
+                <IonCardTitle>{task.titulo}</IonCardTitle>
+              </IonCardHeader>
+              <IonCardContent>
+                <p>{task.descripcion}</p>
+                <IonItem lines="none">
+                  <IonLabel>
+                    Estado: {task.completed ? 'Completada' : 'Pendiente'}
+                  </IonLabel>
+                </IonItem>
+              </IonCardContent>
+            </IonCard>
+          ))}
+        </IonList>
+      )}
 
-        {tasks.length === 0 ? (
-          <div className="ion-padding ion-text-center">
-            <p>No tienes tareas pendientes</p>
-            <IonButton expand="block" onClick={handleAddTask}>
-              Crear una tarea
-            </IonButton>
-          </div>
-        ) : (
-          <IonList>
-            {tasks.map((task) => (
-  <IonCard key={task.id} onClick={() => handleTaskClick(task.id)}>
-    <IonCardHeader>
-      <IonCardSubtitle>
-        {task.createdAt && new Date(task.createdAt.seconds * 1000).toLocaleDateString()}
-      </IonCardSubtitle>
-      <IonCardTitle>{task.titulo}</IonCardTitle>  {/* Cambiado de title a titulo */}
-    </IonCardHeader>
-    <IonCardContent>
-      <p>{task.descripcion}</p>  {/* Cambiado de description a descripcion */}
-      <IonItem lines="none">
-        <IonLabel>
-          Estado: {task.completed ? 'Completada' : 'Pendiente'}
-        </IonLabel>
-      </IonItem>
-    </IonCardContent>
-  </IonCard>
-))}
-          </IonList>
-        )}
+      {/* Botón de alarma flotante */}
+      <AlarmButton 
+        position={{ vertical: 'bottom', horizontal: 'start' }}
+        className="ion-margin"
+      />
 
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={handleAddTask}>
-            <IonIcon icon={add} />
-          </IonFabButton>
-        </IonFab>
+      {/* FAB existente para agregar tareas */}
+      <IonFab vertical="bottom" horizontal="end" slot="fixed">
+        <IonFabButton onClick={handleAddTask}>
+          <IonIcon icon={add} />
+        </IonFabButton>
+      </IonFab>
 
-        <IonToast
-          isOpen={showToast}
-          onDidDismiss={() => setShowToast(false)}
-          message={toastMessage}
-          duration={2000}
-          color="danger"
-        />
-      </IonContent>
-    </IonPage>
-  );
+      <IonToast
+        isOpen={showToast}
+        onDidDismiss={() => setShowToast(false)}
+        message={toastMessage}
+        duration={2000}
+        color="danger"
+      />
+    </IonContent>
+  </IonPage>
+);
 };
 
 export default Home;
